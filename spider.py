@@ -15,7 +15,6 @@ proxy = {
 	'https':'https://127.0.0.1:1080'
 }
 
-urls = []
 
 name = input('>>name:')
 if not os.path.exists('G:\instagram'):
@@ -36,6 +35,7 @@ def parse_first_page(url):
 	item = re.findall(partten, html)
 	# print(item[0])
 	data = json.loads(item[0])
+	urls = []
 	u_id = data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["id"]
 	after = data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]["page_info"][
 		"end_cursor"]
@@ -47,6 +47,7 @@ def parse_first_page(url):
 		display_url = edge["node"]["display_url"]
 		urls.append(display_url)
 		# print(display_url)
+	save_by_thread(urls)
 	return u_id,after,next_judge
 
 def get_next_page(url):
@@ -64,12 +65,23 @@ def get_urls(html):
 	after = data["data"]["user"]["edge_owner_to_timeline_media"]["page_info"]["end_cursor"]
 	next_judge = data["data"]["user"]["edge_owner_to_timeline_media"]["page_info"]["has_next_page"]
 	# print(data)
+	urls = []
 	edges = data["data"]["user"]["edge_owner_to_timeline_media"]["edges"]
 	for edge in edges:
 		url = edge["node"]["display_url"]
 		# print(url)
 		urls.append(url)
+	save_by_thread(urls)
 	return after,next_judge
+
+def save_by_thread(urls):
+	t_objs = []
+	for url in urls:
+		t = threading.Thread(target=save_iamges, args=(url,))
+		t.start()
+		t_objs.append(t)
+	for t in t_objs:
+		t.join()
 
 def save_iamges(url):
 	# if not os.path.exists('G:\instagram'):
@@ -94,7 +106,7 @@ def main():
 		"first": 48,
 		"after": after
 	}
-	for i in range(2):
+	for i in range(10):
 		next_url = 'https://www.instagram.com/graphql/query/?' + 'query_hash=f2405b236d85e8296cf30347c9f08c2a&' + 'variables={0}'.format(json.dumps(variables))
 		html =get_next_page(next_url)
 		after1,next_judge = get_urls(html)
@@ -102,10 +114,10 @@ def main():
 
 if __name__ == '__main__':
 	main()
-	t_objs = []
-	for url in urls:
-		t = threading.Thread(target=save_iamges,args=(url,))
-		t.start()
-		t_objs.append(t)
-	for t in t_objs:
-		t.join()
+	# t_objs = []
+	# for url in urls:
+	# 	t = threading.Thread(target=save_iamges,args=(url,))
+	# 	t.start()
+	# 	t_objs.append(t)
+	# for t in t_objs:
+	# 	t.join()
