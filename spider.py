@@ -17,9 +17,12 @@ proxy = {
 
 urls = []
 
-os.mkdir('G:\instagram')
+name = input('>>name:')
+if not os.path.exists('G:\instagram'):
+	os.mkdir('G:\instagram')
 os.chdir('G:\instagram')
-os.mkdir('sakura')
+if not os.path.exists(name):
+	os.mkdir(name)
 
 def parse_first_page(url):
 	try:
@@ -69,7 +72,12 @@ def get_urls(html):
 	return after,next_judge
 
 def save_iamges(url):
-	os.chdir('G:\instagram\sakura')
+	# if not os.path.exists('G:\instagram'):
+	# 	os.mkdir('G:\instagram')
+	# os.chdir('G:\instagram')
+	# if not os.path.exists(name):
+	# 	os.mkdir(name)
+	os.chdir('G:\instagram\\' + name)
 	# print(url)
 	res = requests.get(url, headers=header, proxies=proxy)
 	file_name = str(url[-65:-48]) + '.jpg'
@@ -78,14 +86,15 @@ def save_iamges(url):
 		f.write(res.content)
 
 def main():
-	url = 'https://www.instagram.com/sakura.gun/'
+
+	url = 'https://www.instagram.com/' + name +'/'
 	u_id, after, next_judge = parse_first_page(url)
 	variables = {
 		"id": u_id,
 		"first": 48,
 		"after": after
 	}
-	for i in range(3):
+	for i in range(2):
 		next_url = 'https://www.instagram.com/graphql/query/?' + 'query_hash=f2405b236d85e8296cf30347c9f08c2a&' + 'variables={0}'.format(json.dumps(variables))
 		html =get_next_page(next_url)
 		after1,next_judge = get_urls(html)
@@ -100,18 +109,3 @@ if __name__ == '__main__':
 		t_objs.append(t)
 	for t in t_objs:
 		t.join()
-
-	# save_iamges()
-	# os.mkdir('G:\instagram')
-	# os.chdir('G:\instagram')
-	# os.mkdir('sakura')
-	# i = 0
-	# for url in urls:
-	# 	os.chdir('G:\instagram\sakura')
-	# 	# print(url)
-	# 	res = requests.get(url, headers=header, proxies=proxy)
-	# 	file_name = str(i) + '.jpg'
-	# 	i = i + 1
-	# 	print('downloading...' + url)
-	# 	with open(file_name, 'wb') as f:
-	# 		f.write(res.content)
